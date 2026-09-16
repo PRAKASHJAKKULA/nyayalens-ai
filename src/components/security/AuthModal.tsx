@@ -36,10 +36,10 @@ export const AuthModal: React.FC = () => {
   const [mode, setMode] = useState<'LOGIN' | 'SIGNUP' | 'MFA' | 'RESET' | 'RESET_SUCCESS'>('LOGIN');
 
   // Form Inputs
-  const [email, setEmail] = useState<string>('suresh.verma@mospi.gov.in');
+  const [email, setEmail] = useState<string>('prakash.jakkula@mospi.gov.in');
   const [password, setPassword] = useState<string>('Government@2024');
-  const [name, setName] = useState<string>('Dr. Suresh Verma');
-  const [employeeId, setEmployeeId] = useState<string>('MOSPI-AUD-8821');
+  const [name, setName] = useState<string>('Prakash Jakkula');
+  const [employeeId, setEmployeeId] = useState<string>('MOSPI-DIR-001');
   const [role, setRole] = useState<UserRole>('MOSPI_AUDITOR');
   const [mfaCode, setMfaCode] = useState<string>('884210');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -330,12 +330,12 @@ export const AuthModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setEmail('suresh.verma@mospi.gov.in');
+                      setEmail('prakash.jakkula@mospi.gov.in');
                       setPassword('Government@2024');
                     }}
                     className="bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-gov-200 dark:border-slate-800 font-mono text-brand-700 dark:text-brand-400"
                   >
-                    Auditor (Dr. Verma)
+                    Chief Auditor (Prakash Jakkula)
                   </button>
                   <button
                     type="button"

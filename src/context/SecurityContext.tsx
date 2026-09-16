@@ -13,15 +13,15 @@ import { calculateSha256 } from '../services/cryptoLedger';
 const PRESET_GOV_USERS: AuthUser[] = [
   {
     id: 'USR-MOSPI-01',
-    name: 'Dr. Suresh Verma',
-    email: 'suresh.verma@mospi.gov.in',
-    employeeId: 'MOSPI-AUD-8821',
+    name: 'Prakash Jakkula',
+    email: 'prakash.jakkula@mospi.gov.in',
+    employeeId: 'MOSPI-DIR-001',
     department: 'Data Informatics & Innovation Division (MoSPI)',
     role: 'MOSPI_AUDITOR',
     mfaEnabled: true,
     isGovVerified: true,
     lastLogin: '2024-09-01T09:15:00Z',
-    sessionToken: 'jwt_sec_mospi_aud_8821_a9f8e7d6'
+    sessionToken: 'jwt_sec_prakash_jakkula_dir_001_a9f8e7d6'
   },
   {
     id: 'USR-IAS-02',

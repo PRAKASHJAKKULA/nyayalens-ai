@@ -106,6 +106,65 @@ export const CommandCenter: React.FC = () => {
         />
       </div>
 
+      {/* Ultra-Minimalist 3-Step Action Hub */}
+      <div className="bg-gradient-to-r from-brand-900 via-brand-800 to-gov-900 text-white p-4 rounded-xl shadow-gov space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base">⚡</span>
+            <h3 className="font-extrabold text-xs uppercase tracking-wider text-white">
+              Chief Auditor 3-Step Fast Track — Lead: Prakash Jakkula
+            </h3>
+          </div>
+          <span className="text-[10px] font-mono bg-white/10 px-2 py-0.5 rounded text-brand-200">
+            One-Click Workflow
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div
+            onClick={() => {
+              setSelectedProjectId('MPL-28471');
+              setActiveTab('evidence-explorer');
+            }}
+            className="bg-white/10 hover:bg-white/15 p-3 rounded-lg border border-white/10 cursor-pointer transition-all space-y-1 group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase text-risk-critical">1. Inspect Top Anomaly</span>
+              <ChevronRight className="w-3.5 h-3.5 text-brand-300 group-hover:translate-x-1 transition-transform" />
+            </div>
+            <h4 className="font-bold text-xs text-white">Case MPL-28471 (Hyderabad)</h4>
+            <p className="text-[11px] text-brand-200">2.76× cost anomaly, 42m duplicate overlap & stalled physical progress.</p>
+          </div>
+
+          <div
+            onClick={() => {
+              setSelectedProjectId('MPL-28471');
+              setActiveTab('field-inspection');
+            }}
+            className="bg-white/10 hover:bg-white/15 p-3 rounded-lg border border-white/10 cursor-pointer transition-all space-y-1 group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase text-emerald-400">2. Geo-Tagged Field Proof</span>
+              <ChevronRight className="w-3.5 h-3.5 text-brand-300 group-hover:translate-x-1 transition-transform" />
+            </div>
+            <h4 className="font-bold text-xs text-white">Inspect Site Photos (12m GPS)</h4>
+            <p className="text-[11px] text-brand-200">Immutable SHA-256 tamper-evident field photos and milestone checks.</p>
+          </div>
+
+          <div
+            onClick={() => setActiveTab('review-center')}
+            className="bg-white/10 hover:bg-white/15 p-3 rounded-lg border border-white/10 cursor-pointer transition-all space-y-1 group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase text-amber-300">3. Take Auditor Action</span>
+              <ChevronRight className="w-3.5 h-3.5 text-brand-300 group-hover:translate-x-1 transition-transform" />
+            </div>
+            <h4 className="font-bold text-xs text-white">41 Works Awaiting Sign-off</h4>
+            <p className="text-[11px] text-brand-200">1-click determination to Escalate to Vigilance or Approve fund releases.</p>
+          </div>
+        </div>
+      </div>
+
       {/* Real-Time Risk Distribution Bar (Colorful through DATA) */}
       <div className="bg-white dark:bg-[#0f172a] border border-gov-200 dark:border-slate-800 p-4 rounded-xl shadow-gov space-y-2.5">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
