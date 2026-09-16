@@ -1,7 +1,6 @@
 import React from 'react';
 import { useProjects } from '../../context/ProjectContext';
 import { useSecurity } from '../../context/SecurityContext';
-import { UserRole } from '../../types';
 import {
   Search,
   Bell,
@@ -14,7 +13,9 @@ import {
   ChevronRight,
   Sparkles,
   Lock,
-  UserCheck
+  Play,
+  Layers,
+  SlidersHorizontal
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -27,14 +28,15 @@ export const Header: React.FC = () => {
     setSearchQuery,
     stats,
     setActiveTab,
-    setSelectedProjectId
+    setSelectedProjectId,
+    uiMode,
+    toggleUiMode,
+    startTour
   } = useProjects();
 
   const {
     currentUser,
-    setCurrentUser,
-    setAuthModalOpen,
-    securityHealthScore
+    setAuthModalOpen
   } = useSecurity();
 
   return (
@@ -73,85 +75,49 @@ export const Header: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by Project ID (e.g. MPL-28471), Agency, District, MP..."
+              placeholder="Search by Project ID (e.g. MPL-28471), Agency, District..."
               className="w-full bg-gov-50 dark:bg-slate-900 border border-gov-200 dark:border-slate-800 focus:border-brand-600 focus:bg-white dark:focus:bg-slate-900 rounded-lg pl-9 pr-4 py-1.5 text-xs text-gov-900 dark:text-slate-100 placeholder-gov-400 focus:outline-none transition-all"
             />
           </div>
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2.5">
-          {/* Security SOC Health Indicator */}
+        <div className="flex items-center gap-2">
+          {/* Quick Guided Tour Button */}
           <button
-            onClick={() => setActiveTab('security-soc')}
-            className="hidden xl:flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-lg text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 transition-colors"
-            title="9 Security Checks Verified (CERT-In / ISO 27001)"
+            onClick={startTour}
+            className="flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white font-extrabold px-3 py-1.5 rounded-lg text-xs transition-all shadow-sm"
           >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span className="font-mono">Security SOC: 98% (9/9 Checks)</span>
+            <Play className="w-3 h-3 fill-white" />
+            <span className="hidden sm:inline">30s Quick Tour</span>
           </button>
 
-          {/* Quick Demo Case Jump */}
+          {/* Mode Switcher: Executive Simple vs Advanced Analyst */}
           <button
-            onClick={() => {
-              setSelectedProjectId('MPL-28471');
-              setActiveTab('evidence-explorer');
-            }}
-            className="hidden lg:flex items-center gap-1.5 bg-risk-criticalBg border border-risk-criticalBorder px-2.5 py-1 rounded-lg text-xs font-bold text-risk-criticalText hover:bg-red-100 transition-colors"
+            onClick={toggleUiMode}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border flex items-center gap-1.5 ${
+              uiMode === 'executive'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800'
+                : 'bg-gov-100 text-gov-800 border-gov-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
+            }`}
+            title="Toggle between Executive Simple View and Advanced Analyst Suite"
           >
-            <span className="w-2 h-2 rounded-full bg-risk-critical animate-pulse" />
-            <span>Case MPL-28471 (87 Critical)</span>
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">
+              {uiMode === 'executive' ? 'Simple Mode' : 'Advanced Mode'}
+            </span>
           </button>
 
           {/* Theme Switcher: Light / Dark Analyst Mode */}
           <button
             onClick={toggleTheme}
-            className="p-1.5 rounded-lg border border-gov-200 dark:border-slate-800 bg-gov-50 dark:bg-slate-900 text-gov-600 dark:text-slate-300 hover:bg-gov-100 dark:hover:bg-slate-800 transition-all text-xs flex items-center gap-1.5"
-            title={themeMode === 'light' ? 'Switch to Dark Analyst Mode' : 'Switch to Light Mode'}
+            className="p-1.5 rounded-lg border border-gov-200 dark:border-slate-800 bg-gov-50 dark:bg-slate-900 text-gov-600 dark:text-slate-300 hover:bg-gov-100 dark:hover:bg-slate-800 transition-all text-xs"
+            title={themeMode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
           >
-            {themeMode === 'light' ? (
-              <>
-                <Moon className="w-3.5 h-3.5 text-gov-700" />
-                <span className="text-[11px] font-medium hidden sm:inline">Analyst Dark</span>
-              </>
-            ) : (
-              <>
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[11px] font-medium hidden sm:inline">Standard Light</span>
-              </>
-            )}
+            {themeMode === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5 text-amber-400" />}
           </button>
 
-          {/* Device Simulator Toggle */}
-          <div className="hidden sm:flex items-center bg-gov-100 dark:bg-slate-900 border border-gov-200 dark:border-slate-800 p-0.5 rounded-lg">
-            <button
-              onClick={() => setDeviceMode('auto')}
-              title="Desktop Command View"
-              className={`p-1 rounded text-xs transition-all ${
-                deviceMode === 'auto'
-                  ? 'bg-white dark:bg-slate-800 text-brand-700 dark:text-brand-300 shadow-sm font-bold'
-                  : 'text-gov-500 hover:text-gov-800 dark:text-slate-400'
-              }`}
-            >
-              <Monitor className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => {
-                setDeviceMode('mobile');
-                setActiveTab('field-inspection');
-              }}
-              title="Field Inspector Mobile App"
-              className={`p-1 rounded text-xs transition-all ${
-                deviceMode === 'mobile'
-                  ? 'bg-white dark:bg-slate-800 text-brand-700 dark:text-brand-300 shadow-sm font-bold'
-                  : 'text-gov-500 hover:text-gov-800 dark:text-slate-400'
-              }`}
-            >
-              <Smartphone className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Government User Identity Badge & Auth Modal Opener */}
+          {/* Officer Account Button */}
           <button
             onClick={() => setAuthModalOpen(true)}
             className="flex items-center gap-2 bg-gov-50 dark:bg-slate-900 border border-gov-200 dark:border-slate-800 rounded-lg px-2.5 py-1 text-xs hover:bg-gov-100 dark:hover:bg-slate-800 transition-all text-left"
@@ -159,9 +125,9 @@ export const Header: React.FC = () => {
             <div className="w-5 h-5 rounded-full bg-brand-600 text-white font-bold text-[10px] flex items-center justify-center">
               {currentUser.name.slice(0, 1)}
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden lg:block">
               <span className="font-bold text-gov-900 dark:text-white block text-[11px] leading-tight">
-                {currentUser.name.split(' ')[0]} (Gov Verified)
+                {currentUser.name.split(' ')[0]}
               </span>
               <span className="text-[9px] text-brand-700 dark:text-brand-300 font-mono block">
                 {currentUser.role.replace('_', ' ')}

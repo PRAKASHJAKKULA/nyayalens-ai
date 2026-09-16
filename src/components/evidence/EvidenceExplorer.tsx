@@ -188,6 +188,44 @@ export const EvidenceExplorer: React.FC = () => {
         </div>
       </div>
 
+      {/* Simplified 3-Point Plain-English Summary Card */}
+      <div className="bg-brand-50/70 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-900 rounded-xl p-4 shadow-sm space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base">💡</span>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-brand-950 dark:text-brand-300">
+              Plain-English Auditor Summary: Why this work is flagged ({s.totalScore}/100)
+            </h3>
+          </div>
+          <span className="text-[10px] font-mono font-bold bg-white dark:bg-slate-900 text-brand-700 dark:text-brand-400 px-2 py-0.5 rounded border border-brand-200">
+            Action Required
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+          <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-brand-100 dark:border-slate-800 space-y-1">
+            <span className="text-[10px] font-bold uppercase text-risk-critical block">1. Cost Anomaly (+24 pts)</span>
+            <p className="text-gov-700 dark:text-slate-300 text-[11px]">
+              Sanction of <strong>₹{selectedProject.sanctionedAmountLakhs}L</strong> is <strong>2.76× higher</strong> than similar community halls (peer average: ₹10.5L).
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-brand-100 dark:border-slate-800 space-y-1">
+            <span className="text-[10px] font-bold uppercase text-risk-high block">2. Spatial Duplicate (+22 pts)</span>
+            <p className="text-gov-700 dark:text-slate-300 text-[11px]">
+              Identified <strong>42 meters away</strong> from existing sanctioned work <strong>MPL-28469</strong> with 89.4% title similarity.
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-brand-100 dark:border-slate-800 space-y-1">
+            <span className="text-[10px] font-bold uppercase text-amber-600 block">3. Field Gap (+18 pts)</span>
+            <p className="text-gov-700 dark:text-slate-300 text-[11px]">
+              84.5% funds disbursed (₹24.5L), but on-site GPS verification confirmed only <strong>38% physical work</strong> complete.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Sub-Navigation Tabs */}
       <div className="flex items-center gap-1 border-b border-gov-200 dark:border-slate-800 overflow-x-auto text-xs font-bold">
         {[

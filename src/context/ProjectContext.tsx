@@ -62,6 +62,8 @@ const INITIAL_LIVE_EVENTS: LiveIntelligenceEvent[] = [
   }
 ];
 
+export type UiMode = 'executive' | 'advanced';
+
 interface ProjectContextType {
   projects: Project[];
   selectedProject: Project;
@@ -75,6 +77,15 @@ interface ProjectContextType {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   toggleTheme: () => void;
+  uiMode: UiMode;
+  setUiMode: (mode: UiMode) => void;
+  toggleUiMode: () => void;
+  tourActive: boolean;
+  tourStep: number;
+  startTour: () => void;
+  nextTourStep: () => void;
+  prevTourStep: () => void;
+  endTour: () => void;
   filterTier: RiskTier | 'ALL';
   setFilterTier: (tier: RiskTier | 'ALL') => void;
   filterSector: ProjectSector | 'ALL';
@@ -110,6 +121,11 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [userRole, setUserRole] = useState<UserRole>('MOSPI_AUDITOR');
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('auto');
   const [themeMode, setThemeModeState] = useState<ThemeMode>('light');
+  const [uiMode, setUiMode] = useState<UiMode>('executive'); // Default to Executive Simple Mode
+
+  // Guided Tour State
+  const [tourActive, setTourActive] = useState<boolean>(false);
+  const [tourStep, setTourStep] = useState<number>(1);
 
   const [filterTier, setFilterTier] = useState<RiskTier | 'ALL'>('ALL');
   const [filterSector, setFilterSector] = useState<ProjectSector | 'ALL'>('ALL');
@@ -136,6 +152,46 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
     setThemeModeState((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
+  const toggleUiMode = () => {
+    setUiMode((prev) => (prev === 'executive' ? 'advanced' : 'executive'));
+  };
+
+  const startTour = () => {
+    setSelectedProjectIdState('MPL-28471');
+    setActiveTab('command-center');
+    setTourStep(1);
+    setTourActive(true);
+  };
+
+  const nextTourStep = () => {
+    if (tourStep === 1) {
+      setSelectedProjectIdState('MPL-28471');
+      setActiveTab('evidence-explorer');
+      setTourStep(2);
+    } else if (tourStep === 2) {
+      setActiveTab('review-center');
+      setTourStep(3);
+    } else {
+      setTourActive(false);
+      setTourStep(1);
+    }
+  };
+
+  const prevTourStep = () => {
+    if (tourStep === 3) {
+      setActiveTab('evidence-explorer');
+      setTourStep(2);
+    } else if (tourStep === 2) {
+      setActiveTab('command-center');
+      setTourStep(1);
+    }
+  };
+
+  const endTour = () => {
+    setTourActive(false);
+    setTourStep(1);
+  };
+
   const selectedProject =
     projects.find((p) => p.id === selectedProjectId) || projects[0] || INITIAL_PROJECTS[0];
 
@@ -158,44 +214,29 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
   const submitFieldInspection = async (
     inspectionData: Omit<FieldInspectionSubmission, 'id' | 'digitalTamperProofHash'>
   ) => {
-    const id = `INSP-${Date.now().toString().slice(-6)}`;
-    const proofHash = await createInspectionProof({
-      ...inspectionData,
-      id
-    });
+    const newId = `INSP-${Date.now().toString().slice(-4)}`;
+    const proofPayload = `${newId}-${inspectionData.projectId}-${inspectionData.timestamp}-${inspectionData.verifiedPhysicalProgressPct}-${inspectionData.recordedLat}`;
+    const tamperHash = await calculateSha256(proofPayload);
 
     const fullInspection: FieldInspectionSubmission = {
       ...inspectionData,
-      id,
-      digitalTamperProofHash: proofHash
+      id: newId,
+      digitalTamperProofHash: tamperHash
     };
 
     setProjects((prev) =>
       prev.map((p) => {
         if (p.id === inspectionData.projectId) {
-          const newPhotos = inspectionData.photos.map((ph) => ({
-            id: ph.id,
-            url: ph.url,
-            caption: ph.caption,
-            timestamp: ph.timestamp,
-            geoLat: inspectionData.recordedLat,
-            geoLng: inspectionData.recordedLng,
-            sha256Hash: ph.sha256Hash,
-            tamperVerified: true
-          }));
-
-          const updatedProject: Project = {
-            ...p,
-            inspectionStatus: inspectionData.recommendation === 'ESCALATE' ? 'FLAGGED' : 'VERIFIED',
-            lastInspectedAt: inspectionData.timestamp,
-            physicalProgressPct: inspectionData.verifiedPhysicalProgressPct,
-            photos: [...p.photos, ...newPhotos]
-          };
-
-          const updatedSignals = computeProjectRiskScore(updatedProject, prev);
           return {
-            ...updatedProject,
-            riskSignals: updatedSignals
+            ...p,
+            physicalProgressPct: inspectionData.verifiedPhysicalProgressPct,
+            inspectionStatus: 'VERIFIED',
+            reviewStatus:
+              inspectionData.recommendation === 'ESCALATE'
+                ? 'ESCALATED'
+                : inspectionData.recommendation === 'NEEDS_REVIEW'
+                ? 'RE_INSPECT'
+                : 'ACCEPTED'
           };
         }
         return p;
@@ -203,62 +244,43 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
     );
 
     const newLog: AuditLogEntry = {
-      id: `AUD-${Date.now().toString().slice(-5)}`,
+      id: `LOG-${Date.now().toString().slice(-4)}`,
       timestamp: new Date().toISOString(),
       actor: inspectionData.inspectorName,
       role: 'FIELD_INSPECTOR',
-      projectId: inspectionData.projectId,
       actionType: 'FIELD_INSPECTION_SUBMITTED',
-      description: `Field inspection by ${inspectionData.inspectorName}. GPS: ${inspectionData.distanceMeters}m (PASS). Progress updated to ${inspectionData.verifiedPhysicalProgressPct}%.`,
-      immutableProofHash: proofHash
+      projectId: inspectionData.projectId,
+      description: `Field inspection recorded (${inspectionData.verifiedPhysicalProgressPct}% actual vs ${inspectionData.reportedPhysicalProgressPct}% reported). GPS proximity: ${inspectionData.distanceMeters.toFixed(1)}m.`,
+      immutableProofHash: tamperHash
     };
+    setAuditLogs((prev) => [newLog, ...prev]);
 
-    const newEvt: LiveIntelligenceEvent = {
+    const newEvent: LiveIntelligenceEvent = {
       id: `EVT-${Date.now().toString().slice(-4)}`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       type: 'INSPECTION',
       projectId: inspectionData.projectId,
       title: 'Field Verification Completed & Signed',
-      changeDesc: `GPS: ${inspectionData.distanceMeters}m from site. Physical progress set to ${inspectionData.verifiedPhysicalProgressPct}%.`,
-      severity: inspectionData.recommendation === 'ESCALATE' ? 'CRITICAL' : 'LOW'
+      changeDesc: `Inspector verified ${inspectionData.verifiedPhysicalProgressPct}% physical work at (${inspectionData.recordedLat.toFixed(3)}, ${inspectionData.recordedLng.toFixed(3)})`,
+      severity: inspectionData.recommendation === 'ESCALATE' ? 'CRITICAL' : 'MODERATE'
     };
-
-    setAuditLogs((prev) => [newLog, ...prev]);
-    setLiveEvents((prev) => [newEvt, ...prev]);
+    setLiveEvents((prev) => [newEvent, ...prev]);
   };
 
   const updateProjectReview = async (
     projectId: string,
-    reviewStatus: Project['reviewStatus'],
+    status: Project['reviewStatus'],
     notes: string
   ) => {
-    const actor = userRole === 'MOSPI_AUDITOR' ? 'Dr. S. Verma (MoSPI)' : 'K. Ramesh (District Collector)';
-    const actionType =
-      reviewStatus === 'ACCEPTED'
-        ? 'RISK_SIGNAL_ACCEPTED'
-        : reviewStatus === 'DISMISSED'
-        ? 'RISK_SIGNAL_DISMISSED'
-        : reviewStatus === 'ESCALATED'
-        ? 'ESCALATED_TO_VIGILANCE'
-        : 'RE_INSPECTION_ORDERED';
-
-    const hash = await calculateSha256({
-      projectId,
-      reviewStatus,
-      notes,
-      actor,
-      timestamp: new Date().toISOString()
-    });
+    const hash = await calculateSha256(`REVIEW-${projectId}-${status}-${Date.now()}-${notes}`);
 
     setProjects((prev) =>
       prev.map((p) => {
         if (p.id === projectId) {
           return {
             ...p,
-            reviewStatus,
-            reviewNotes: notes,
-            reviewedBy: actor,
-            reviewedAt: new Date().toISOString().split('T')[0]
+            reviewStatus: status,
+            reviewNotes: notes
           };
         }
         return p;
@@ -266,60 +288,54 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
     );
 
     const newLog: AuditLogEntry = {
-      id: `AUD-${Date.now().toString().slice(-5)}`,
+      id: `LOG-${Date.now().toString().slice(-4)}`,
       timestamp: new Date().toISOString(),
-      actor,
+      actor: 'Dr. Suresh Verma',
       role: userRole,
+      actionType: status === 'ESCALATED' ? 'ESCALATED_TO_VIGILANCE' : 'RISK_SIGNAL_ACCEPTED',
       projectId,
-      actionType,
-      description: `Decision [${reviewStatus}]: ${notes}`,
+      description: `Determination recorded: ${status}. Notes: ${notes}`,
       immutableProofHash: hash
     };
+    setAuditLogs((prev) => [newLog, ...prev]);
 
-    const newEvt: LiveIntelligenceEvent = {
+    const newEvent: LiveIntelligenceEvent = {
       id: `EVT-${Date.now().toString().slice(-4)}`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      type: 'REVIEW',
+      type: 'SCORE_CHANGE',
       projectId,
-      title: `Auditor Determination: ${reviewStatus}`,
-      changeDesc: notes,
-      severity: reviewStatus === 'ESCALATED' ? 'CRITICAL' : 'MODERATE'
+      title: `Auditor Determination: ${status}`,
+      changeDesc: notes.slice(0, 70) + (notes.length > 70 ? '...' : ''),
+      severity: status === 'ESCALATED' ? 'CRITICAL' : 'LOW'
     };
-
-    setAuditLogs((prev) => [newLog, ...prev]);
-    setLiveEvents((prev) => [newEvt, ...prev]);
+    setLiveEvents((prev) => [newEvent, ...prev]);
   };
 
   const filteredProjects = projects.filter((p) => {
     if (filterTier !== 'ALL' && p.riskSignals.tier !== filterTier) return false;
     if (filterSector !== 'ALL' && p.sector !== filterSector) return false;
     if (filterState !== 'ALL' && p.state !== filterState) return false;
-    if (searchQuery.trim()) {
+    if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase();
-      const match =
-        p.id.toLowerCase().includes(q) ||
-        p.title.toLowerCase().includes(q) ||
-        p.district.toLowerCase().includes(q) ||
-        p.state.toLowerCase().includes(q) ||
-        p.implementingAgencyName.toLowerCase().includes(q) ||
-        p.contractorName.toLowerCase().includes(q);
-      if (!match) return false;
+      const matchId = p.id.toLowerCase().includes(q);
+      const matchTitle = p.title.toLowerCase().includes(q);
+      const matchDistrict = p.district.toLowerCase().includes(q);
+      const matchMp = p.mpName.toLowerCase().includes(q);
+      const matchAgency = p.implementingAgencyName.toLowerCase().includes(q);
+      return matchId || matchTitle || matchDistrict || matchMp || matchAgency;
     }
     return true;
   });
 
-  const totalSanctionedLakhs = projects.reduce((acc, p) => acc + p.sanctionedAmountLakhs, 0);
-  const totalSpentLakhs = projects.reduce((acc, p) => acc + p.spentAmountLakhs, 0);
-
   const stats = {
     totalProjects: 12480,
-    criticalCount: 127,
-    highCount: 312,
-    moderateCount: 2246,
-    lowCount: 8860,
+    criticalCount: projects.filter((p) => p.riskSignals.tier === 'CRITICAL').length,
+    highCount: projects.filter((p) => p.riskSignals.tier === 'HIGH').length,
+    moderateCount: projects.filter((p) => p.riskSignals.tier === 'MODERATE').length,
+    lowCount: projects.filter((p) => p.riskSignals.tier === 'LOW').length,
     totalSanctionedCr: 2840.5,
-    totalSpentCr: 2310.2,
-    needReviewCount: 41
+    totalSpentCr: 1984.2,
+    needReviewCount: projects.filter((p) => p.reviewStatus === 'UNREVIEWED' || p.reviewStatus === 'RE_INSPECT').length
   };
 
   return (
@@ -337,6 +353,15 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         themeMode,
         setThemeMode,
         toggleTheme,
+        uiMode,
+        setUiMode,
+        toggleUiMode,
+        tourActive,
+        tourStep,
+        startTour,
+        nextTourStep,
+        prevTourStep,
+        endTour,
         filterTier,
         setFilterTier,
         filterSector,

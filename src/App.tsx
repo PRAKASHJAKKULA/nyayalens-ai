@@ -3,6 +3,7 @@ import { ProjectProvider, useProjects } from './context/ProjectContext';
 import { SecurityProvider } from './context/SecurityContext';
 import { Header } from './components/common/Header';
 import { Sidebar } from './components/common/Sidebar';
+import { GuidedTourBanner } from './components/common/GuidedTourBanner';
 import { CommandCenter } from './components/dashboard/CommandCenter';
 import { EvidenceExplorer } from './components/evidence/EvidenceExplorer';
 import { RelationshipGraph } from './components/graph/RelationshipGraph';
@@ -46,9 +47,10 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-gov-50 dark:bg-[#0b1329] text-gov-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-150">
       <Header />
+      <GuidedTourBanner />
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Persistent Enterprise Sidebar */}
+        {/* Persistent Sidebar */}
         <Sidebar />
 
         {/* Main Operational Viewport */}
