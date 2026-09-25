@@ -15,20 +15,29 @@ import { MobileInspectionView } from './components/mobile/MobileInspectionView';
 import { ReviewCenter } from './components/review/ReviewCenter';
 import { EvaluationLab } from './components/evaluation/EvaluationLab';
 import { SecurityOperationsCenter } from './components/security/SecurityOperationsCenter';
+import { CitizenPortal } from './components/citizen/CitizenPortal';
 import { AuthModal } from './components/security/AuthModal';
 import { SessionTimeoutModal } from './components/security/SessionTimeoutModal';
 
 const AppContent: React.FC = () => {
-  const { activeTab, deviceMode, appStage, setAppStage, startTour } = useProjects();
+  const { activeTab, deviceMode, appStage, setAppStage, startTour, portalView, setPortalView } = useProjects();
 
   // STAGE 1: App Purpose & Introduction Landing Page
   if (appStage === 'PURPOSE_WELCOME') {
     return (
       <PurposeLandingPage
-        onProceedToLogin={() => setAppStage('OFFICER_LOGIN')}
+        onProceedToLogin={() => {
+          setPortalView('officer');
+          setAppStage('OFFICER_LOGIN');
+        }}
         onLaunchInstantDemo={() => {
+          setPortalView('officer');
           setAppStage('MAIN_DASHBOARD');
           setTimeout(() => startTour(), 200);
+        }}
+        onEnterCitizenPortal={() => {
+          setPortalView('citizen');
+          setAppStage('MAIN_DASHBOARD');
         }}
       />
     );
@@ -38,7 +47,10 @@ const AppContent: React.FC = () => {
   if (appStage === 'OFFICER_LOGIN') {
     return (
       <OfficerLoginPage
-        onLoginSuccess={() => setAppStage('MAIN_DASHBOARD')}
+        onLoginSuccess={() => {
+          setPortalView('officer');
+          setAppStage('MAIN_DASHBOARD');
+        }}
         onBackToPurpose={() => setAppStage('PURPOSE_WELCOME')}
       />
     );
@@ -76,12 +88,14 @@ const AppContent: React.FC = () => {
       <GuidedTourBanner />
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Persistent Sidebar */}
-        <Sidebar />
+        {/* Persistent Sidebar (Shown only in Officer Audit Mode) */}
+        {portalView === 'officer' && <Sidebar />}
 
         {/* Main Operational Viewport */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6 bg-gov-50 dark:bg-[#0b1329]">
-          {deviceMode === 'mobile' ? (
+          {portalView === 'citizen' ? (
+            <CitizenPortal />
+          ) : deviceMode === 'mobile' ? (
             <div className="max-w-md mx-auto py-2">
               <div className="text-center pb-2 text-[11px] text-gov-500 dark:text-slate-400 font-mono">
                 📱 Simulated Smartphone Viewport (Field Inspector App)

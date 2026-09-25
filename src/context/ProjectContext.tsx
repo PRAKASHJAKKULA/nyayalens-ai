@@ -64,6 +64,7 @@ const INITIAL_LIVE_EVENTS: LiveIntelligenceEvent[] = [
 
 export type UiMode = 'executive' | 'advanced';
 export type AppStage = 'PURPOSE_WELCOME' | 'OFFICER_LOGIN' | 'MAIN_DASHBOARD';
+export type PortalView = 'citizen' | 'officer';
 
 interface ProjectContextType {
   projects: Project[];
@@ -73,6 +74,9 @@ interface ProjectContextType {
   setActiveTab: (tab: string) => void;
   appStage: AppStage;
   setAppStage: (stage: AppStage) => void;
+  portalView: PortalView;
+  setPortalView: (view: PortalView) => void;
+  togglePortalView: () => void;
   userRole: UserRole;
   setUserRole: (role: UserRole) => void;
   deviceMode: DeviceMode;
@@ -101,6 +105,7 @@ interface ProjectContextType {
   auditLogs: AuditLogEntry[];
   liveEvents: LiveIntelligenceEvent[];
   submitFieldInspection: (inspection: Omit<FieldInspectionSubmission, 'id' | 'digitalTamperProofHash'>) => Promise<void>;
+  submitCitizenReport: (projectId: string, citizenName: string, phone: string, issue: string) => Promise<void>;
   updateProjectReview: (projectId: string, status: Project['reviewStatus'], notes: string) => Promise<void>;
   recomputeRiskForProject: (projectId: string) => void;
   stats: {
@@ -122,6 +127,7 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [selectedProjectId, setSelectedProjectIdState] = useState<string>('MPL-28471');
   const [activeTab, setActiveTab] = useState<string>('command-center');
   const [appStage, setAppStage] = useState<AppStage>('PURPOSE_WELCOME'); // Default to Purpose Welcome page
+  const [portalView, setPortalView] = useState<PortalView>('citizen'); // Default to Citizen Transparency mode
   const [userRole, setUserRole] = useState<UserRole>('MOSPI_AUDITOR');
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('auto');
   const [themeMode, setThemeModeState] = useState<ThemeMode>('light');
@@ -154,6 +160,10 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const toggleTheme = () => {
     setThemeModeState((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  const togglePortalView = () => {
+    setPortalView((prev) => (prev === 'citizen' ? 'officer' : 'citizen'));
   };
 
   const toggleUiMode = () => {
@@ -315,6 +325,37 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
     setLiveEvents((prev) => [newEvent, ...prev]);
   };
 
+  const submitCitizenReport = async (
+    projectId: string,
+    citizenName: string,
+    phone: string,
+    issue: string
+  ) => {
+    const hash = await calculateSha256(`CITIZEN-REPORT-${projectId}-${Date.now()}-${issue}`);
+    const newLog: AuditLogEntry = {
+      id: `LOG-CITIZEN-${Date.now().toString().slice(-4)}`,
+      timestamp: new Date().toISOString(),
+      actor: `${citizenName} (Public Citizen Watch)`,
+      role: 'FIELD_INSPECTOR',
+      actionType: 'FIELD_INSPECTION_SUBMITTED',
+      projectId,
+      description: `Citizen Grievance Filed: "${issue}" (Contact: ${phone || 'Anonymous'}). Forwarded to Chief Auditor Prakash Jakkula for on-site inquiry.`,
+      immutableProofHash: hash
+    };
+    setAuditLogs((prev) => [newLog, ...prev]);
+
+    const newEvent: LiveIntelligenceEvent = {
+      id: `EVT-${Date.now().toString().slice(-4)}`,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      type: 'ANOMALY',
+      projectId,
+      title: 'Public Citizen Grievance Received',
+      changeDesc: `${citizenName}: ${issue.slice(0, 60)}...`,
+      severity: 'HIGH'
+    };
+    setLiveEvents((prev) => [newEvent, ...prev]);
+  };
+
   const filteredProjects = projects.filter((p) => {
     if (filterTier !== 'ALL' && p.riskSignals.tier !== filterTier) return false;
     if (filterSector !== 'ALL' && p.sector !== filterSector) return false;
@@ -352,6 +393,9 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         setActiveTab,
         appStage,
         setAppStage,
+        portalView,
+        setPortalView,
+        togglePortalView,
         userRole,
         setUserRole,
         deviceMode,
@@ -380,6 +424,7 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         auditLogs,
         liveEvents,
         submitFieldInspection,
+        submitCitizenReport,
         updateProjectReview,
         recomputeRiskForProject,
         stats

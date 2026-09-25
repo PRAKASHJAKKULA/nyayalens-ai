@@ -32,7 +32,9 @@ export const Header: React.FC = () => {
     uiMode,
     toggleUiMode,
     startTour,
-    setAppStage
+    setAppStage,
+    portalView,
+    togglePortalView
   } = useProjects();
 
   const {
@@ -84,6 +86,19 @@ export const Header: React.FC = () => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
+          {/* Public Citizen View Switcher */}
+          <button
+            onClick={togglePortalView}
+            className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all border flex items-center gap-1.5 shadow-sm ${
+              portalView === 'citizen'
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-500 ring-2 ring-emerald-400/50'
+                : 'bg-brand-50 hover:bg-brand-100 text-brand-800 border-brand-300 dark:bg-brand-950 dark:text-brand-300'
+            }`}
+            title="Switch between Public Citizen View (Jan Seva) and Government Officer Mode"
+          >
+            <span>{portalView === 'citizen' ? '👥 Citizen Portal (Active)' : '👥 Citizen View'}</span>
+          </button>
+
           {/* App Purpose & Guide Button */}
           <button
             onClick={() => setAppStage('PURPOSE_WELCOME')}

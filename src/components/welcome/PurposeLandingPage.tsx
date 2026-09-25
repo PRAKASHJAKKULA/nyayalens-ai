@@ -20,11 +20,13 @@ import {
 interface PurposeLandingPageProps {
   onProceedToLogin: () => void;
   onLaunchInstantDemo: () => void;
+  onEnterCitizenPortal: () => void;
 }
 
 export const PurposeLandingPage: React.FC<PurposeLandingPageProps> = ({
   onProceedToLogin,
-  onLaunchInstantDemo
+  onLaunchInstantDemo,
+  onEnterCitizenPortal
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gov-50 via-white to-gov-100 dark:from-[#080d1e] dark:via-[#0b1329] dark:to-[#0f172a] text-gov-900 dark:text-slate-100 font-sans flex flex-col justify-between">
@@ -52,18 +54,24 @@ export const PurposeLandingPage: React.FC<PurposeLandingPageProps> = ({
 
           <div className="flex items-center gap-2.5">
             <button
+              onClick={onEnterCitizenPortal}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3 py-1.5 rounded-lg text-xs transition-all shadow-sm flex items-center gap-1.5"
+            >
+              <span>👥 Public Citizen Portal</span>
+            </button>
+            <button
               onClick={onLaunchInstantDemo}
-              className="bg-gov-100 hover:bg-gov-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gov-800 dark:text-slate-200 font-bold px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5"
+              className="bg-gov-100 hover:bg-gov-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gov-800 dark:text-slate-200 font-bold px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 hidden sm:flex"
             >
               <Play className="w-3 h-3 fill-gov-800 dark:fill-slate-200" />
-              <span>Instant 1-Click Demo</span>
+              <span>1-Click Demo</span>
             </button>
             <button
               onClick={onProceedToLogin}
               className="bg-brand-600 hover:bg-brand-700 text-white font-extrabold px-4 py-1.5 rounded-lg text-xs transition-all shadow-sm flex items-center gap-1.5"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span>Officer Login Gateway &rarr;</span>
+              <span>Officer Login &rarr;</span>
             </button>
           </div>
         </div>
@@ -84,24 +92,69 @@ export const PurposeLandingPage: React.FC<PurposeLandingPageProps> = ({
           </h1>
 
           <p className="text-sm sm:text-base text-gov-600 dark:text-slate-300 leading-relaxed">
-            <strong>NyayaLens AI</strong> transforms how public infrastructure funds (MPLADS) are monitored across India. By replacing blind sample audits with <strong>mathematical peer baselines</strong>, <strong>geospatial duplicate detection</strong>, and <strong>tamper-evident SHA-256 evidence proofing</strong>, it empowers government auditors to spot irregularities months before project deadlines.
+            <strong>NyayaLens AI</strong> transforms how public infrastructure funds (MPLADS) are monitored across India. Designed with <strong>dual transparency</strong>: an ultra-simple portal for common citizens and students to track local neighborhood works, alongside an advanced AI forensic suite for government auditors.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <button
-              onClick={onProceedToLogin}
-              className="bg-brand-600 hover:bg-brand-700 text-white font-extrabold px-6 py-3 rounded-xl text-sm transition-all shadow-gov flex items-center gap-2 group"
-            >
-              <span>Proceed to Officer Login Gateway</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
+          {/* Dual Entry Choices */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left pt-3">
+            {/* Citizen Portal Card */}
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30 border-2 border-emerald-400 dark:border-emerald-700 p-5 rounded-2xl shadow-gov space-y-3 flex flex-col justify-between hover:shadow-gov-lg transition-all">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+                    👥 For Citizens & Students (Jan Seva)
+                  </span>
+                  <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold">No Login Needed</span>
+                </div>
+                <h3 className="font-extrabold text-base text-emerald-950 dark:text-white">
+                  See How Local Tax Funds Are Spent In Your Area
+                </h3>
+                <p className="text-xs text-emerald-900/80 dark:text-slate-300 leading-relaxed">
+                  Search your district, see simple <strong>Money Paid vs Ground Work Built</strong> progress bars, read plain-English summaries, view verified photos, and report stalled works.
+                </p>
+              </div>
+              <button
+                onClick={onEnterCitizenPortal}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-xs transition-all shadow-sm flex items-center justify-center gap-2 group"
+              >
+                <span>Enter Public Citizen Portal (Jan Seva)</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
 
+            {/* Officer Gateway Card */}
+            <div className="bg-gradient-to-br from-brand-50 to-indigo-50 dark:from-brand-950/40 dark:to-indigo-950/30 border-2 border-brand-300 dark:border-brand-700 p-5 rounded-2xl shadow-gov space-y-3 flex flex-col justify-between hover:shadow-gov-lg transition-all">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="bg-brand-700 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+                    🏛️ For MoSPI & District Auditors
+                  </span>
+                  <span className="text-[10px] text-brand-700 dark:text-brand-300 font-bold">Official Access</span>
+                </div>
+                <h3 className="font-extrabold text-base text-brand-950 dark:text-white">
+                  Chief Auditor Command & SIEM Security Suite
+                </h3>
+                <p className="text-xs text-brand-900/80 dark:text-slate-300 leading-relaxed">
+                  Access 3D CAD digital twins, contractor collusion network graphs, 9-Domain SIEM security logs, and the SHA-256 evidence review center.
+                </p>
+              </div>
+              <button
+                onClick={onProceedToLogin}
+                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-extrabold py-2.5 rounded-xl text-xs transition-all shadow-sm flex items-center justify-center gap-2 group"
+              >
+                <span>Proceed to Officer Login Gateway</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-center justify-center">
             <button
               onClick={onLaunchInstantDemo}
-              className="bg-white hover:bg-gov-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-gov-800 dark:text-slate-200 font-bold px-5 py-3 rounded-xl text-sm border border-gov-300 dark:border-slate-700 transition-all shadow-sm flex items-center gap-2"
+              className="inline-flex items-center gap-2 text-xs font-bold text-gov-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
             >
-              <Play className="w-4 h-4 fill-brand-600 text-brand-600" />
-              <span>Launch 30-Second Guided Tour</span>
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span>Or click here to launch the 30-Second Guided Tour directly</span>
             </button>
           </div>
         </div>
@@ -245,9 +298,15 @@ export const PurposeLandingPage: React.FC<PurposeLandingPageProps> = ({
             Ready to Experience the Government Command Center?
           </h3>
           <p className="text-xs sm:text-sm text-brand-200 max-w-xl mx-auto">
-            Log in with your official cadre credentials or launch the guided interactive investigation flow.
+            Choose whether to explore as a public citizen/student or log in with official cadre credentials.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              onClick={onEnterCitizenPortal}
+              className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold px-6 py-3 rounded-xl text-sm transition-all shadow-md flex items-center gap-2"
+            >
+              <span>👥 Public Citizen Portal (Jan Seva) &rarr;</span>
+            </button>
             <button
               onClick={onProceedToLogin}
               className="bg-white hover:bg-brand-50 text-brand-900 font-extrabold px-6 py-3 rounded-xl text-sm transition-all shadow-md flex items-center gap-2"
@@ -260,7 +319,7 @@ export const PurposeLandingPage: React.FC<PurposeLandingPageProps> = ({
               className="bg-brand-700 hover:bg-brand-600 text-white font-bold px-5 py-3 rounded-xl text-sm border border-brand-500 transition-all flex items-center gap-2"
             >
               <Play className="w-4 h-4 fill-white" />
-              <span>Instant 1-Click Demo (Prakash Jakkula)</span>
+              <span>Instant 1-Click Demo</span>
             </button>
           </div>
         </div>
