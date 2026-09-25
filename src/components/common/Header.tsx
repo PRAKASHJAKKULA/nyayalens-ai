@@ -31,7 +31,8 @@ export const Header: React.FC = () => {
     setSelectedProjectId,
     uiMode,
     toggleUiMode,
-    startTour
+    startTour,
+    setAppStage
   } = useProjects();
 
   const {
@@ -83,6 +84,16 @@ export const Header: React.FC = () => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
+          {/* App Purpose & Guide Button */}
+          <button
+            onClick={() => setAppStage('PURPOSE_WELCOME')}
+            className="flex items-center gap-1.5 bg-gov-100 hover:bg-gov-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gov-800 dark:text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold border border-gov-200 dark:border-slate-700 transition-all"
+            title="View App Purpose, Instructions & Architecture Overview"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-brand-600" />
+            <span className="hidden sm:inline">App Purpose & Guide</span>
+          </button>
+
           {/* Quick Guided Tour Button */}
           <button
             onClick={startTour}

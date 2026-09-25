@@ -1,6 +1,8 @@
 import React from 'react';
 import { ProjectProvider, useProjects } from './context/ProjectContext';
 import { SecurityProvider } from './context/SecurityContext';
+import { PurposeLandingPage } from './components/welcome/PurposeLandingPage';
+import { OfficerLoginPage } from './components/welcome/OfficerLoginPage';
 import { Header } from './components/common/Header';
 import { Sidebar } from './components/common/Sidebar';
 import { GuidedTourBanner } from './components/common/GuidedTourBanner';
@@ -17,8 +19,32 @@ import { AuthModal } from './components/security/AuthModal';
 import { SessionTimeoutModal } from './components/security/SessionTimeoutModal';
 
 const AppContent: React.FC = () => {
-  const { activeTab, deviceMode } = useProjects();
+  const { activeTab, deviceMode, appStage, setAppStage, startTour } = useProjects();
 
+  // STAGE 1: App Purpose & Introduction Landing Page
+  if (appStage === 'PURPOSE_WELCOME') {
+    return (
+      <PurposeLandingPage
+        onProceedToLogin={() => setAppStage('OFFICER_LOGIN')}
+        onLaunchInstantDemo={() => {
+          setAppStage('MAIN_DASHBOARD');
+          setTimeout(() => startTour(), 200);
+        }}
+      />
+    );
+  }
+
+  // STAGE 2: Government Officer Login Gateway
+  if (appStage === 'OFFICER_LOGIN') {
+    return (
+      <OfficerLoginPage
+        onLoginSuccess={() => setAppStage('MAIN_DASHBOARD')}
+        onBackToPurpose={() => setAppStage('PURPOSE_WELCOME')}
+      />
+    );
+  }
+
+  // STAGE 3: Home Dashboard & Full Operational Module Suite
   const renderActiveView = () => {
     switch (activeTab) {
       case 'command-center':

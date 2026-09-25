@@ -63,6 +63,7 @@ const INITIAL_LIVE_EVENTS: LiveIntelligenceEvent[] = [
 ];
 
 export type UiMode = 'executive' | 'advanced';
+export type AppStage = 'PURPOSE_WELCOME' | 'OFFICER_LOGIN' | 'MAIN_DASHBOARD';
 
 interface ProjectContextType {
   projects: Project[];
@@ -70,6 +71,8 @@ interface ProjectContextType {
   setSelectedProjectId: (id: string) => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  appStage: AppStage;
+  setAppStage: (stage: AppStage) => void;
   userRole: UserRole;
   setUserRole: (role: UserRole) => void;
   deviceMode: DeviceMode;
@@ -118,6 +121,7 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
   const [selectedProjectId, setSelectedProjectIdState] = useState<string>('MPL-28471');
   const [activeTab, setActiveTab] = useState<string>('command-center');
+  const [appStage, setAppStage] = useState<AppStage>('PURPOSE_WELCOME'); // Default to Purpose Welcome page
   const [userRole, setUserRole] = useState<UserRole>('MOSPI_AUDITOR');
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('auto');
   const [themeMode, setThemeModeState] = useState<ThemeMode>('light');
@@ -346,6 +350,8 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         setSelectedProjectId,
         activeTab,
         setActiveTab,
+        appStage,
+        setAppStage,
         userRole,
         setUserRole,
         deviceMode,
